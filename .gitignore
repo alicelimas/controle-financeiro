@@ -15,5 +15,3 @@ __pycache__/
 *.log
 .cache/
 
-# Configurações sensíveis
-settings.py  
