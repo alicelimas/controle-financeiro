@@ -1,0 +1,19 @@
+# Ambiente virtual
+venv/
+env/
+.env
+
+# Banco de dados SQLite 
+db.sqlite3
+
+# Arquivos do IDE
+.idea/
+*.pyc
+__pycache__/
+
+# Logs e cache
+*.log
+.cache/
+
+# Configurações sensíveis
+settings.py  

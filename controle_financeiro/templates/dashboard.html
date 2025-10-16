@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Dashboard Financeiro</h5>
+    </div>
+    <div class="card-body">
+        <h6 class="card-subtitle mb-3 text-muted">Total no ano de {{ ano }}: R$ {{ total_ano|floatformat:2 }}</h6>
+        <form method="GET" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <select name="categoria" class="form-select">
+                        <option value="">Todas as Categorias</option>
+                        {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}" {% if categoria_selecionada == categoria.id|stringformat:"s" %}selected{% endif %}>
+                                {{ categoria.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="ano" class="form-control" value="{{ ano }}" placeholder="Ex.: 2025">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Gastos por Mês</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoMensal"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Gastos por Categoria</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoCategoria"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    fetch("{% url 'dados_graficos' %}?ano={{ ano }}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}")
+        .then(response => response.json())
+        .then(data => {
+            // Gráfico Mensal
+            new Chart(document.getElementById('graficoMensal').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: data.mensal.map(item => item.mes),
+                    datasets: [{
+                        label: 'Gastos por Mês (R$)',
+                        data: data.mensal.map(item => item.total),
+                        backgroundColor: '#36A2EB',
+                        borderColor: '#0056b3',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Gráfico de Pizza (Categoria)
+            new Chart(document.getElementById('graficoCategoria').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: data.categoria.map(item => item.categoria),
+                    datasets: [{
+                        data: data.categoria.map(item => item.total),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                }
+            });
+        });
+</script>
+{% endblock %}
