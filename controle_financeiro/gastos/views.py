@@ -35,12 +35,18 @@ def index(request):
             else:
                 messages.error(request, 'Erro ao adicionar gasto. Verifique os dados.')
     
-    gastos = Gasto.objects.select_related('categoria').order_by('-data_gasto')[:5]
+    # Correção: Consulta base sem slicing ainda (mantém QuerySet lazy)
+    queryset = Gasto.objects.select_related('categoria').order_by('-data_gasto')
+    
+    # Aplica filter ANTES do slicing, se houver categoria
     if categoria_id:
         try:
-            gastos = gastos.filter(categoria_id=int(categoria_id))
+            queryset = queryset.filter(categoria_id=int(categoria_id))
         except ValueError:
             messages.error(request, 'Categoria inválida.')
+    
+    # Agora aplica o slicing APÓS o filter (limita a 5 itens)
+    gastos = queryset[:5]
     
     categorias = Categoria.objects.all()
     edit_gasto = None
