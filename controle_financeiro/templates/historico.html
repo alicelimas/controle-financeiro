@@ -6,142 +6,163 @@
         <h5 class="mb-0">Histórico Completo de Gastos</h5>
     </div>
     <div class="card-body">
-        <form method="GET" class="row g-3 mb-4">
-            <div class="col-md-3">
-                <label for="data_inicio" class="form-label">Data Início</label>
-                <input type="date" name="data_inicio" id="data_inicio" class="form-control" value="{{ data_inicio }}">
-            </div>
-            <div class="col-md-3">
-                <label for="data_fim" class="form-label">Data Fim</label>
-                <input type="date" name="data_fim" id="data_fim" class="form-control" value="{{ data_fim }}">
-            </div>
-            <div class="col-md-3">
-                <label for="categoria" class="form-label">Categoria</label>
-                <select name="categoria" id="categoria" class="form-select">
-                    <option value="">Todas as Categorias</option>
-                    {% for categoria in categorias %}
-                        <option value="{{ categoria.id }}" {% if categoria_selecionada == categoria.id|stringformat:"s" %}selected{% endif %}>
-                            {{ categoria.nome }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="recorrencia" class="form-label">Recorrência</label>
-                <select name="recorrencia" id="recorrencia" class="form-select">
-                    <option value="">Todas as Recorrências</option>
-                    {% for value, label in recorrencias %}
-                        <option value="{{ value }}" {% if recorrencia_selecionada == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-12 mt-3">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-funnel"></i> Filtrar
-                </button>
-                <a href="{% url 'historico' %}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-clockwise"></i> Limpar Filtros
-                </a>
-                <a href="{% url 'exportar_gastos' %}?{% if categoria_selecionada %}categoria={{ categoria_selecionada }}&{% endif %}{% if recorrencia_selecionada %}recorrencia={{ recorrencia_selecionada }}&{% endif %}{% if data_inicio %}data_inicio={{ data_inicio }}&{% endif %}{% if data_fim %}data_fim={{ data_fim }}{% endif %}" class="btn btn-success">
-                    <i class="bi bi-download"></i> Exportar em CSV
-                </a>
-            </div>
-        </form>
 
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Descrição</th>
-                    <th>Categoria</th>
-                    <th>Valor</th>
-                    <th>Recorrência</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for gasto in gastos %}
+        <!-- Filtros agrupados com card e título -->
+        <div class="card border-0 border-bottom mb-4">
+            <div class="card-body p-3">
+                <h6 class="card-title mb-3">Filtros</h6>
+                <form method="GET" class="row g-3">
+                    <div class="col-12 col-md-3">
+                        <label for="data_inicio" class="form-label">Data Início</label>
+                        <input type="date" name="data_inicio" id="data_inicio" class="form-control"
+                            value="{{ data_inicio }}">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label for="data_fim" class="form-label">Data Fim</label>
+                        <input type="date" name="data_fim" id="data_fim" class="form-control" value="{{ data_fim }}">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label for="categoria" class="form-label">Categoria</label>
+                        <select name="categoria" id="categoria" class="form-select">
+                            <option value="">Todas as Categorias</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" {% if categoria_selecionada == categoria.id|stringformat:"i" %}selected{% endif %}>{{ categoria.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label for="recorrencia" class="form-label">Recorrência</label>
+                        <select name="recorrencia" id="recorrencia" class="form-select">
+                            <option value="">Todas as Recorrências</option>
+                            {% for value, label in recorrencias %}
+                                <option value="{{ value }}" {% if recorrencia_selecionada == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 mt-3 d-flex justify-content-between flex-wrap">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm" title="Filtrar gastos">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                            <a href="{% url 'historico' %}" class="btn btn-secondary btn-sm" title="Limpar filtros">
+                                <i class="bi bi-arrow-clockwise"></i> Limpar
+                            </a>
+                        </div>
+                        <div class="mt-2 mt-md-0">
+                            <a href="{% url 'exportar_gastos' %}?{% if categoria_selecionada %}categoria={{ categoria_selecionada }}&{% endif %}{% if recorrencia_selecionada %}recorrencia={{ recorrencia_selecionada }}&{% endif %}{% if data_inicio %}data_inicio={{ data_inicio }}&{% endif %}{% if data_fim %}data_fim={{ data_fim }}{% endif %}"
+                                class="btn btn-success btn-sm" title="Exportar gastos filtrados para CSV">
+                                <i class="bi bi-download"></i> Exportar CSV
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabela responsiva -->
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                        <th class="d-none d-md-table-cell">Recorrência</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gasto in gastos %}
                     <tr>
                         <td>{{ gasto.data_gasto|date:"d/m/Y" }}</td>
                         <td>{{ gasto.descrição }}</td>
                         <td>{{ gasto.categoria.nome }}</td>
                         <td>R$ {{ gasto.valor|floatformat:2 }}</td>
-                        <td>{{ gasto.recorrência }}</td>
+                        <td class="d-none d-md-table-cell">
+                            <span class="badge bg-secondary">{{ gasto.recorrência }}</span>
+                        </td>
                         <td>
-                            <a href="{% url 'index' %}?editar={{ gasto.id }}" class="btn btn-sm btn-warning">
-                                <i class="bi bi-pencil"></i> Editar
+                            <a href="{% url 'index' %}?editar={{ gasto.id }}&origem=historico{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if recorrencia_selecionada %}&recorrencia={{ recorrencia_selecionada }}{% endif %}{% if data_inicio %}&data_inicio={{ data_inicio }}{% endif %}{% if data_fim %}&data_fim={{ data_fim }}{% endif %}" class="btn btn-sm btn-warning" title="Editar gasto">
+                                <i class="bi bi-pencil"></i>
                             </a>
-                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarApagarModal{{ gasto.id }}">
-                                <i class="bi bi-trash"></i> Apagar
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                data-bs-target="#confirmarApagarModal{{ gasto.id }}" title="Apagar gasto">
+                                <i class="bi bi-trash"></i>
                             </button>
                         </td>
                     </tr>
-                    <!-- Modal de Exclusão -->
-                    <div class="modal fade" id="confirmarApagarModal{{ gasto.id }}" tabindex="-1" aria-labelledby="confirmarApagarModalLabel{{ gasto.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
+
+                    <!-- Modal de exclusão -->
+                    <div class="modal fade" id="confirmarApagarModal{{ gasto.id }}" tabindex="-1"
+                        aria-labelledby="confirmarApagarModalLabel{{ gasto.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="confirmarApagarModalLabel{{ gasto.id }}">Confirmar Exclusão</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <h5 class="modal-title" id="confirmarApagarModalLabel{{ gasto.id }}">Confirmar
+                                        Exclusão</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    Tem certeza que deseja apagar o gasto "<strong>{{ gasto.descrição }}</strong>" de R$ {{ gasto.valor|floatformat:2 }}?
+                                    Tem certeza que deseja apagar o gasto "<strong>{{ gasto.descrição }}</strong>" de
+                                    <strong>R$ {{ gasto.valor|floatformat:2 }}</strong>?
                                 </div>
                                 <div class="modal-footer">
-                                    <form method="POST" action="{% url 'apagar_gasto' gasto.id %}">
+                                    <form method="POST" action="{% url 'apagar_gasto' gasto.id %}?origem=historico">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger">Apagar</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-danger btn-sm">Apagar</button>
+                                        <button type="button" class="btn btn-secondary btn-sm"
+                                            data-bs-dismiss="modal">Cancelar</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
-                {% empty %}
+
+                    {% empty %}
                     <tr>
                         <td colspan="6" class="text-center">Nenhum gasto encontrado para os filtros selecionados.</td>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <!-- Paginação -->
         {% if gastos.has_other_pages %}
-            <nav aria-label="Paginação" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if gastos.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ gastos.previous_page_number }}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if recorrencia_selecionada %}&recorrencia={{ recorrencia_selecionada }}{% endif %}{% if data_inicio %}&data_inicio={{ data_inicio }}{% endif %}{% if data_fim %}&data_fim={{ data_fim }}{% endif %}">Anterior</a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">Anterior</span>
-                        </li>
-                    {% endif %}
-                    {% for num in gastos.paginator.page_range %}
-                        {% if gastos.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if recorrencia_selecionada %}&recorrencia={{ recorrencia_selecionada }}{% endif %}{% if data_inicio %}&data_inicio={{ data_inicio }}{% endif %}{% if data_fim %}&data_fim={{ data_fim }}{% endif %}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if gastos.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ gastos.next_page_number }}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if recorrencia_selecionada %}&recorrencia={{ recorrencia_selecionada }}{% endif %}{% if data_inicio %}&data_inicio={{ data_inicio }}{% endif %}{% if data_fim %}&data_fim={{ data_fim }}{% endif %}">Próximo</a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">Próximo</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
+        <nav aria-label="Paginação" class="mt-4">
+            <ul class="pagination justify-content-center pagination-sm flex-wrap gap-1">
+                {% if gastos.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page={{ gastos.previous_page_number }}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if recorrencia_selecionada %}&recorrencia={{ recorrencia_selecionada }}{% endif %}{% if data_inicio %}&data_inicio={{ data_inicio }}{% endif %}{% if data_fim %}&data_fim={{ data_fim }}{% endif %}">Anterior</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                {% endif %}
+
+                {% for num in gastos.paginator.page_range %}
+                {% if gastos.number == num %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link"
+                        href="?page={{ num }}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if recorrencia_selecionada %}&recorrencia={{ recorrencia_selecionada }}{% endif %}{% if data_inicio %}&data_inicio={{ data_inicio }}{% endif %}{% if data_fim %}&data_fim={{ data_fim }}{% endif %}">{{
+                        num }}</a></li>
+                {% endif %}
+                {% endfor %}
+
+                {% if gastos.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page={{ gastos.next_page_number }}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if recorrencia_selecionada %}&recorrencia={{ recorrencia_selecionada }}{% endif %}{% if data_inicio %}&data_inicio={{ data_inicio }}{% endif %}{% if data_fim %}&data_fim={{ data_fim }}{% endif %}">Próximo</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Próximo</span></li>
+                {% endif %}
+            </ul>
+        </nav>
         {% endif %}
     </div>
 </div>

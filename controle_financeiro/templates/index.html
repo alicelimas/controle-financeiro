@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="row">
-    <div class="col-md-6">
+<div class="row g-3">
+    <div class="col-12 col-md-6">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Adicionar Gasto</h5>
             </div>
             <div class="card-body">
-                <form method="POST">
+                <form method="POST" class="needs-validation" novalidate>
                     {% csrf_token %}
                     {% if form.errors and not edit_gasto %}
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -23,6 +23,10 @@
                             <div class="invalid-feedback d-block">
                                 {{ form.descrição.errors }}
                             </div>
+                        {% else %}
+                            <div class="invalid-feedback">
+                                Por favor, informe a descrição do gasto.
+                            </div>
                         {% endif %}
                     </div>
                     <div class="mb-3">
@@ -31,6 +35,10 @@
                         {% if form.categoria.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.categoria.errors }}
+                            </div>
+                        {% else %}
+                            <div class="invalid-feedback">
+                                Por favor, selecione uma categoria.
                             </div>
                         {% endif %}
                     </div>
@@ -41,6 +49,10 @@
                             <div class="invalid-feedback d-block">
                                 {{ form.valor.errors }}
                             </div>
+                        {% else %}
+                            <div class="invalid-feedback">
+                                Por favor, informe um valor válido.
+                            </div>
                         {% endif %}
                     </div>
                     <div class="mb-3">
@@ -49,6 +61,10 @@
                         {% if form.recorrência.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.recorrência.errors }}
+                            </div>
+                        {% else %}
+                            <div class="invalid-feedback">
+                                Por favor, selecione a recorrência.
                             </div>
                         {% endif %}
                     </div>
@@ -59,16 +75,20 @@
                             <div class="invalid-feedback d-block">
                                 {{ form.data_gasto.errors }}
                             </div>
+                        {% else %}
+                            <div class="invalid-feedback">
+                                Por favor, informe a data do gasto.
+                            </div>
                         {% endif %}
                     </div>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-circle"></i> Adicionar Gasto
                     </button>
                 </form>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-12 col-md-6">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Filtrar por Categoria</h5>
@@ -85,7 +105,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary btn-sm">
                         <i class="bi bi-funnel"></i> Filtrar
                     </button>
                 </form>
@@ -93,6 +113,16 @@
         </div>
     </div>
 </div>
+
+<!-- Mensagens 
+{% if messages %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endif %} -->
 
 <div class="card mb-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -102,157 +132,130 @@
         </a>
     </div>
     <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Descrição</th>
-                    <th>Categoria</th>
-                    <th>Valor</th>
-                    <th>Recorrência</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for gasto in gastos %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 table-sm">
+                <thead class="table-light">
                     <tr>
-                        <td>{{ gasto.data_gasto|date:"d/m/Y" }}</td>
-                        <td>{{ gasto.descrição }}</td>
-                        <td>{{ gasto.categoria.nome }}</td>
-                        <td>R$ {{ gasto.valor|floatformat:2 }}</td>
-                        <td>{{ gasto.recorrência }}</td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editarGastoModal{{ gasto.id }}">
-                                <i class="bi bi-pencil"></i> Editar
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarApagarModal{{ gasto.id }}">
-                                <i class="bi bi-trash"></i> Apagar
-                            </button>
-                        </td>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                        <th class="d-none d-md-table-cell">Recorrência</th>
+                        <th>Ações</th>
                     </tr>
-                    <!-- Modal de Edição -->
-                    <div class="modal fade" id="editarGastoModal{{ gasto.id }}" tabindex="-1" aria-labelledby="editarGastoModalLabel{{ gasto.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editarGastoModalLabel{{ gasto.id }}">Editar Gasto: {{ gasto.descrição }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form method="POST">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="edit_gasto_id" value="{{ gasto.id }}">
-                                        {% if form.errors and edit_gasto.id == gasto.id %}
-                                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                                <strong>Erro:</strong> Corrija os erros abaixo.
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                            </div>
-                                        {% endif %}
-                                        <div class="mb-3">
-                                            <label for="edit_descrição_{{ gasto.id }}" class="form-label">Descrição</label>
-                                            <input type="text" name="descrição" class="form-control" id="edit_descrição_{{ gasto.id }}" value="{{ gasto.descrição }}" required>
-                                            {% if form.descrição.errors and edit_gasto.id == gasto.id %}
-                                                <div class="invalid-feedback d-block">
-                                                    {{ form.descrição.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="edit_categoria_{{ gasto.id }}" class="form-label">Categoria</label>
-                                            <select name="categoria" class="form-select" id="edit_categoria_{{ gasto.id }}" required>
-                                                <option value="">Selecione uma categoria</option>
-                                                {% for categoria in categorias %}
-                                                    <option value="{{ categoria.id }}" {% if gasto.categoria.id == categoria.id %}selected{% endif %}>
-                                                        {{ categoria.nome }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                            {% if form.categoria.errors and edit_gasto.id == gasto.id %}
-                                                <div class="invalid-feedback d-block">
-                                                    {{ form.categoria.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="edit_valor_{{ gasto.id }}" class="form-label">Valor (R$)</label>
-                                            <input type="number" name="valor" class="form-control" id="edit_valor_{{ gasto.id }}" value="{{ gasto.valor }}" step="0.01" required>
-                                            {% if form.valor.errors and edit_gasto.id == gasto.id %}
-                                                <div class="invalid-feedback d-block">
-                                                    {{ form.valor.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="edit_recorrência_{{ gasto.id }}" class="form-label">Recorrência</label>
-                                            <select name="recorrência" class="form-select" id="edit_recorrência_{{ gasto.id }}">
-                                                {% for choice in form.recorrência.field.choices %}
-                                                    <option value="{{ choice.0 }}" {% if gasto.recorrência == choice.0 %}selected{% endif %}>
-                                                        {{ choice.1 }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                            {% if form.recorrência.errors and edit_gasto.id == gasto.id %}
-                                                <div class="invalid-feedback d-block">
-                                                    {{ form.recorrência.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="edit_data_gasto_{{ gasto.id }}" class="form-label">Data</label>
-                                            <input type="date" name="data_gasto" class="form-control" id="edit_data_gasto_{{ gasto.id }}" value="{{ gasto.data_gasto|date:'Y-m-d' }}" required>
-                                            {% if form.data_gasto.errors and edit_gasto.id == gasto.id %}
-                                                <div class="invalid-feedback d-block">
-                                                    {{ form.data_gasto.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="d-flex gap-2">
-                                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        </div>
-                                    </form>
+                </thead>
+                <tbody>
+                    {% for gasto in gastos %}
+                        <tr>
+                            <td>{{ gasto.data_gasto|date:"d/m/Y" }}</td>
+                            <td>{{ gasto.descrição }}</td>
+                            <td>{{ gasto.categoria.nome }}</td>
+                            <td>R$ {{ gasto.valor|floatformat:2 }}</td>
+                            <td class="d-none d-md-table-cell">{{ gasto.recorrência }}</td>
+                            <td>
+                                <a href="{% url 'index' %}?editar={{ gasto.id }}" class="btn btn-sm btn-warning" title="Editar gasto">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarApagarModal{{ gasto.id }}" title="Apagar gasto">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Modal de Exclusão -->
+                        <div class="modal fade" id="confirmarApagarModal{{ gasto.id }}" tabindex="-1" aria-labelledby="confirmarApagarModalLabel{{ gasto.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="confirmarApagarModalLabel{{ gasto.id }}">Confirmar Exclusão</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Tem certeza que deseja apagar o gasto "<strong>{{ gasto.descrição }}</strong>"?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form method="POST" action="{% url 'apagar_gasto' gasto.id %}?origem=index">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Apagar</button>
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Modal de Exclusão -->
-                    <div class="modal fade" id="confirmarApagarModal{{ gasto.id }}" tabindex="-1" aria-labelledby="confirmarApagarModalLabel{{ gasto.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="confirmarApagarModalLabel{{ gasto.id }}">Confirmar Exclusão</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Tem certeza que deseja apagar o gasto "<strong>{{ gasto.descrição }}</strong>" de R$ {{ gasto.valor|floatformat:2 }}?
-                                </div>
-                                <div class="modal-footer">
-                                    <form method="POST" action="{% url 'apagar_gasto' gasto.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger">Apagar</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center">Nenhum gasto registrado.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">Nenhum gasto registrado.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<!-- Modal de Edição -->
+{% if edit_gasto %}
+    <div class="modal fade show" id="editarGastoModal" tabindex="-1" aria-labelledby="editarGastoModalLabel" aria-hidden="true" style="display: block;">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editarGastoModalLabel">Editar Gasto: {{ edit_gasto.descrição }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{% url 'index' %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="edit_gasto_id" value="{{ edit_gasto.id }}">
+                        <input type="hidden" name="origem" value="{{ request.GET.origem|default:'index' }}">
+                        {% if request.GET.categoria %}
+                            <input type="hidden" name="categoria" value="{{ request.GET.categoria }}">
+                        {% endif %}
+                        {% if request.GET.recorrencia %}
+                            <input type="hidden" name="recorrencia" value="{{ request.GET.recorrencia }}">
+                        {% endif %}
+                        {% if request.GET.data_inicio %}
+                            <input type="hidden" name="data_inicio" value="{{ request.GET.data_inicio }}">
+                        {% endif %}
+                        {% if request.GET.data_fim %}
+                            <input type="hidden" name="data_fim" value="{{ request.GET.data_fim }}">
+                        {% endif %}
+                        {{ form.as_p }}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">Salvar Alterações</button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 
 <!-- Script para abrir o modal de edição automaticamente -->
 {% if edit_gasto %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var modal = new bootstrap.Modal(document.getElementById('editarGastoModal{{ edit_gasto.id }}'));
+            var modal = new bootstrap.Modal(document.getElementById('editarGastoModal'));
             modal.show();
         });
     </script>
 {% endif %}
+
+<!-- Script para validação Bootstrap -->
+<script>
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })();
+</script>
 {% endblock %}
